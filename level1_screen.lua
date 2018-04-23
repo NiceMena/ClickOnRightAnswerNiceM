@@ -45,10 +45,12 @@ local MAX_NUM = 10
 local firstNumber
 local secondNumber
 
+
 -- the variables that will hold the correct answer and the wrong answers
 local answer 
 local wrongAnswer1
 local wrongAnswer2
+local wrongAnswer3
 
 -- the text object that will hold the addition equation
 local addEquationTextObject 
@@ -57,6 +59,8 @@ local addEquationTextObject
 local answerTextObject 
 local wrongAnswer1TextObject
 local wrongAnswer2TextObject
+local wrongAnswer3TextObject
+local numberCorrect
 
 -- displays the number correct that the user has
 local numberCorrectText 
@@ -80,7 +84,15 @@ local alreadyClickedAnswer = false
 -----------------------------------------------------------------------------------------
 -- SOUND
 -----------------------------------------------------------------------------------------
+local BkgSound
 
+--- bkg sound
+
+local BkgSound = audio.loadSound( "sounds/level1Music.wav")
+local backgroundMusic 
+
+-- setting the music
+backgroundMusic = audio.play(BkgSound) 
 
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
@@ -91,33 +103,48 @@ local function DetermineAnswers()
     answer = firstNumber + secondNumber
     wrongAnswer1 = answer + math.random(1,4)
     wrongAnswer2 = answer + math.random(5,8)
+    wrongAnswer3 = answer + math.random(9,12)
 end
 
 -- Function that changes the answers for a new question and places them randomly in one of the positions
 local function DisplayAnswers( )
 
-    local answerPosition = math.random(1,3)
+    local answerPosition = math.random(1,4)
     answerTextObject.text = tostring( answer )
     wrongAnswer1TextObject.text = tostring( wrongAnswer1 )
     wrongAnswer2TextObject.text = tostring( wrongAnswer2 )
+    wrongAnswer3TextObject.text = tostring( wrongAnswer3 )
 
     if (answerPosition == 1) then                
         
-        answerTextObject.x = display.contentWidth*.3        
+        answerTextObject.x = display.contentWidth*.4        
         wrongAnswer1TextObject.x = display.contentWidth*.2
         wrongAnswer2TextObject.x = display.contentWidth*.1 
+        wrongAnswer3TextObject.x = display.contentWidth*.3
 
     elseif (answerPosition == 2) then
        
-        answerTextObject.x = display.contentWidth*.2        
+        answerTextObject.x = display.contentWidth*.3        
+        wrongAnswer1TextObject.x = display.contentWidth*.1
+        wrongAnswer2TextObject.x = display.contentWidth*.2
+        wrongAnswer3TextObject.x = display.contentWidth*.4
+
+
+    elseif (answerPosition == 3) then
+       
+        answerTextObject.x = display.contentWidth*.2    
         wrongAnswer1TextObject.x = display.contentWidth*.1
         wrongAnswer2TextObject.x = display.contentWidth*.3 
+        wrongAnswer3TextObject.x = display.contentWidth*.4
+
 
     else
        
         answerTextObject.x = display.contentWidth*.1        
         wrongAnswer1TextObject.x = display.contentWidth*.2
         wrongAnswer2TextObject.x = display.contentWidth*.3
+        wrongAnswer3TextObject.x = display.contentWidth*.4
+
     end
 
 end
@@ -127,14 +154,23 @@ local function LoseScreenTransition( )
     composer.gotoScene( "you_lose", {effect = "zoomInOutFade", time = 1000})
 end 
 
+    -- Function that transitions to win Screen
+local function WinScreenTransition( )        
+    composer.gotoScene( "you_win", {effect = "zoomInOutFade", time = 1000})
+end 
+
 -- The function that displays the equation and determines the answer and the wrong answers
 local function DisplayAddEquation()
+
+
     -- local variables to this function
     local addEquationString
 
     -- choose the numbers to add randomly
     firstNumber = math.random(MIN_NUM, MAX_NUM)
     secondNumber = math.random(MIN_NUM, MAX_NUM)
+
+
 
     -- create the addition equation to display
     addEquationString = firstNumber .. " + " .. secondNumber .. " = " 
@@ -157,8 +193,15 @@ local function RestartScene()
     -- if they have 0 lives, go to the You Lose screen
     if (lives == 0) then
         composer.gotoScene("you_lose")
-    else 
+    else
+        DisplayAddEquation()
+        DetermineAnswers()
+        DisplayAnswers()
+    end
 
+    if (numberCorrect == 5) then
+        composer.gotoScene("you_win")
+    else
         DisplayAddEquation()
         DetermineAnswers()
         DisplayAnswers()
@@ -275,9 +318,10 @@ function scene:create( event )
     addEquationTextObject:setTextColor(155/255, 42/255, 198/255)
 
     -- create the text objects that will hold the correct answer and the wrong answers
-    answerTextObject = display.newText("", display.contentWidth*.4, display.contentHeight/2, nil, 50 )
-    wrongAnswer1TextObject = display.newText("", display.contentWidth*.3, display.contentHeight/2, nil, 50 )
-    wrongAnswer2TextObject = display.newText("", display.contentWidth*.2, display.contentHeight/2, nil, 50 )
+    answerTextObject = display.newText("", display.contentWidth*.4, 650, nil, 50 )
+    wrongAnswer1TextObject = display.newText("", display.contentWidth*.3, 650, nil, 50 )
+    wrongAnswer2TextObject = display.newText("", display.contentWidth*.2, 650, nil, 50 )
+    wrongAnswer3TextObject = display.newText("", display.contentWidth*.1, 650, nil, 50)
     numberCorrectText = display.newText("", display.contentWidth*4/5, display.contentHeight*6/7, nil, 25)
 
     -- create the text object that will hold the number of lives
@@ -310,6 +354,7 @@ function scene:create( event )
     sceneGroup:insert( answerTextObject )
     sceneGroup:insert( wrongAnswer1TextObject )
     sceneGroup:insert( wrongAnswer2TextObject )
+    sceneGroup:insert( wrongAnswer3TextObject )
     sceneGroup:insert( congratulationText )
     sceneGroup:insert( correct )
     sceneGroup:insert( level1Text )
